@@ -186,7 +186,7 @@ export default function MatchingPage() {
             <div className="w-8 h-8 bg-gradient-to-r from-cosmic-500 to-accent-500 rounded-full flex items-center justify-center">
               <Star className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-xl font-bold gradient-text">Cosmic Connections</h1>
+            <h1 className="text-xl font-bold gradient-text">Cosmic</h1>
           </div>
           
           <motion.button

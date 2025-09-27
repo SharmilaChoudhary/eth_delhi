@@ -8,7 +8,7 @@ export default function Features() {
   const features = [
     {
       title: "Cosmic Date",
-      description: "Whether you're new to dating or ready to try again, Cosmic Date is built to bring you closer to love safely and meaningfully through astrological compatibility.",
+      description: "Find love through astrology",
       icon: Heart,
       color: "from-yellow-400 to-orange-500",
       image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop",
@@ -16,7 +16,7 @@ export default function Features() {
     },
     {
       title: "Cosmic Friends",
-      description: "Whether you've moved to a new city or just want to expand your circle, Cosmic Friends makes it easy to meet like-minded people who match your cosmic vibe.",
+      description: "Meet like-minded cosmic people",
       icon: Users,
       color: "from-orange-400 to-red-500",
       image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&h=400&fit=crop",
@@ -24,7 +24,7 @@ export default function Features() {
     },
     {
       title: "Cosmic Events",
-      description: "Join our cosmic IRL events where you can stop typing and start talking. Come solo or bring a friend—and leave with a new cosmic connection.",
+      description: "Join real-life cosmic events",
       icon: Calendar,
       color: "from-yellow-500 to-orange-600",
       image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=600&h=400&fit=crop",
@@ -32,20 +32,6 @@ export default function Features() {
     }
   ]
 
-  const zodiacSigns = [
-    { name: "Aries", symbol: "♈", color: "from-red-400 to-red-600" },
-    { name: "Taurus", symbol: "♉", color: "from-green-400 to-green-600" },
-    { name: "Gemini", symbol: "♊", color: "from-yellow-400 to-yellow-600" },
-    { name: "Cancer", symbol: "♋", color: "from-blue-400 to-blue-600" },
-    { name: "Leo", symbol: "♌", color: "from-orange-400 to-orange-600" },
-    { name: "Virgo", symbol: "♍", color: "from-green-400 to-green-600" },
-    { name: "Libra", symbol: "♎", color: "from-pink-400 to-pink-600" },
-    { name: "Scorpio", symbol: "♏", color: "from-purple-400 to-purple-600" },
-    { name: "Sagittarius", symbol: "♐", color: "from-indigo-400 to-indigo-600" },
-    { name: "Capricorn", symbol: "♑", color: "from-gray-400 to-gray-600" },
-    { name: "Aquarius", symbol: "♒", color: "from-cyan-400 to-cyan-600" },
-    { name: "Pisces", symbol: "♓", color: "from-teal-400 to-teal-600" }
-  ]
 
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
@@ -86,33 +72,6 @@ export default function Features() {
           ))}
         </div>
 
-        {/* Zodiac Signs */}
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <h3 className="text-2xl font-bold mb-6">All 12 Zodiac Signs</h3>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-            {zodiacSigns.map((sign, index) => (
-              <motion.div
-                key={sign.name}
-                className="text-center"
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                viewport={{ once: true }}
-              >
-                <div className={`w-12 h-12 bg-gradient-to-r ${sign.color} rounded-full flex items-center justify-center mx-auto mb-2`}>
-                  <span className="text-lg">{sign.symbol}</span>
-                </div>
-                <p className="text-xs font-medium text-gray-600">{sign.name}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
       </div>
     </section>
   )
