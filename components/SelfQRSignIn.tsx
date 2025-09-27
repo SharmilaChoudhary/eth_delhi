@@ -24,7 +24,7 @@ export default function SelfQRSignIn() {
         const app = new SelfAppBuilder({
           version: 2,
           appName: "Cosmic Connections",
-          scope: "cosmic-connections",
+          scope: "self-workshop",
           endpoint: "0x4E0E06726521396edF446967d8E697c15F58AC9C",
           logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
           userId: newUserId,
