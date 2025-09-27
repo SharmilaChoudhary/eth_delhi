@@ -34,7 +34,7 @@ export default function SelfQRSignIn() {
           disclosures: {
             minimumAge: 18,
             ofac: false,
-            excludedCountries: ['USA'],
+            excludedCountries: ["USA"]
           }
         }).build()
         
