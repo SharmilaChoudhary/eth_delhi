@@ -28,7 +28,7 @@ export default function SelfQRSignIn() {
           endpoint: "0x4E0E06726521396edF446967d8E697c15F58AC9C",
           logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
           userId: newUserId,
-          endpointType: "https",
+          endpointType: "celo",
           userIdType: "uuid",
           userDefinedData: "Welcome to Cosmic Connections!",
           disclosures: {
