@@ -25,7 +25,7 @@ export default function SelfQRSignIn() {
           version: 2,
           appName: "Cosmic Connections",
           scope: "cosmic-connections",
-          endpoint: "https://cosmic-connections.vercel.app/api/verify",
+          endpoint: "0x4E0E06726521396edF446967d8E697c15F58AC9C",
           logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
           userId: newUserId,
           endpointType: "https",
@@ -34,7 +34,7 @@ export default function SelfQRSignIn() {
           disclosures: {
             minimumAge: 18,
             ofac: false,
-            excludedCountries: [],
+            excludedCountries: ['USA'],
           }
         }).build()
         
