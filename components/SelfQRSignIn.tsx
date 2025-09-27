@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { motion } from 'framer-motion'
 import { SelfQRcodeWrapper, SelfAppBuilder } from '@selfxyz/qrcode'
 import { v4 as uuidv4 } from 'uuid'
-
+import {ethers} from 'ethers'
 export default function SelfQRSignIn() {
   const [userId, setUserId] = useState<string | null>(null)
   const [isVerified, setIsVerified] = useState(false)
@@ -18,7 +18,7 @@ export default function SelfQRSignIn() {
   useEffect(() => {
     if (isVisible && !selfApp) {
       try {
-        const newUserId = uuidv4()
+        const newUserId = ethers.ZeroAddress
         setUserId(newUserId)
         
         const app = new SelfAppBuilder({
@@ -29,7 +29,7 @@ export default function SelfQRSignIn() {
           logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
           userId: newUserId,
           endpointType: "celo",
-          userIdType: "uuid",
+          userIdType: "hex",
           userDefinedData: "Welcome to Cosmic Connections!",
           disclosures: {
             minimumAge: 18,
