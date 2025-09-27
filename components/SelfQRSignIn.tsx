@@ -25,7 +25,7 @@ export default function SelfQRSignIn() {
           version: 2,
           appName: "Cosmic Connections",
           scope: "self-workshop",
-          endpoint: "0x4E0E06726521396edF446967d8E697c15F58AC9C",
+          endpoint: "0x4e0e06726521396edf446967d8e697c15f58ac9c",
           logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
           userId: newUserId,
           endpointType: "celo",
