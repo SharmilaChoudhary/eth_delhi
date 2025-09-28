@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       bio,
       birth_date: birthDate,
       birth_time: birthTime,
-      profile_photo_url: profilePhotoUrl
+      profile_photo_url: profilePhotoUrl || undefined
     }
 
     // Save to database
