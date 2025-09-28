@@ -59,9 +59,9 @@ export default function SignInPage() {
     setIsVerified(true)
     setVerificationError(null)
     
-    // Redirect to home page after a short delay
+    // Redirect to profile setup page after a short delay
     setTimeout(() => {
-      router.push("/")
+      router.push("/profile-setup")
     }, 3000)
   }
 
@@ -282,7 +282,7 @@ export default function SignInPage() {
                 animate={{ width: "100%" }}
                 transition={{ duration: 3, delay: 0.5 }}
               />
-              <p className="text-sm text-gray-600 mt-4">Redirecting you back to home...</p>
+              <p className="text-sm text-gray-600 mt-4">Redirecting you to profile setup...</p>
             </motion.div>
           )}
         </motion.div>
