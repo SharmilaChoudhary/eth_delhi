@@ -15,19 +15,19 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 interface Profile {
   id: string
   name: string
-  age?: number
+  age: number
   bio: string
   image?: string
   date_of_birth: string
   birth_time: string
   created_at: string
   // Additional fields for display
-  zodiac?: string
-  images?: string[]
-  location?: string
-  interests?: string[]
-  compatibility?: number
-  lastActive?: string
+  zodiac: string
+  images: string[]
+  location: string
+  interests: string[]
+  compatibility: number
+  lastActive: string
 }
 
 export default function MatchingPage() {
@@ -69,7 +69,7 @@ export default function MatchingPage() {
             return {
               id: profile.id,
               name: profile.name || 'Unknown',
-              age: profile.age,
+              age: profile.age || 25, // Default age if not provided
               bio: profile.bio || 'No bio available',
               image: profile.image,
               date_of_birth: profile.date_of_birth,

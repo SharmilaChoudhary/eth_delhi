@@ -8,21 +8,23 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 // Database types
 export interface Profile {
   id?: string
-  user_id?: string
+  name?: string
+  age?: number
   bio: string
-  birth_date: string
+  gender?: string
+  date_of_birth: string
+  nationality?: string
+  image?: string
   birth_time: string
-  profile_photo_url?: string
   created_at?: string
-  updated_at?: string
 }
 
 // Profile operations
 export const profileService = {
   // Create a new profile
-  async createProfile(profileData: Omit<Profile, 'id' | 'created_at' | 'updated_at'>) {
+  async createProfile(profileData: Omit<Profile, 'id' | 'created_at'>) {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('user_profiles')
       .insert([profileData])
       .select()
       .single()
@@ -34,12 +36,12 @@ export const profileService = {
     return data
   },
 
-  // Get profile by user_id
-  async getProfile(userId: string) {
+  // Get profile by id
+  async getProfile(profileId: string) {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('user_profiles')
       .select('*')
-      .eq('user_id', userId)
+      .eq('id', profileId)
       .single()
 
     if (error) {
@@ -50,11 +52,11 @@ export const profileService = {
   },
 
   // Update profile
-  async updateProfile(userId: string, updates: Partial<Profile>) {
+  async updateProfile(profileId: string, updates: Partial<Profile>) {
     const { data, error } = await supabase
-      .from('profiles')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('user_id', userId)
+      .from('user_profiles')
+      .update(updates)
+      .eq('id', profileId)
       .select()
       .single()
 
@@ -68,11 +70,11 @@ export const profileService = {
   // Upload profile photo
   async uploadProfilePhoto(file: File, userId: string) {
     const fileExt = file.name.split('.').pop()
-    const fileName = `${userId}-${Date.now()}.${fileExt}`
-    const filePath = `profile-photos/${fileName}`
+    const fileName = `avatar-${userId}-${Date.now()}.${fileExt}`
+    const filePath = `avatars/${fileName}`
 
     const { error: uploadError } = await supabase.storage
-      .from('profile-photos')
+      .from('avatars')
       .upload(filePath, file)
 
     if (uploadError) {
@@ -81,7 +83,7 @@ export const profileService = {
 
     // Get public URL
     const { data } = supabase.storage
-      .from('profile-photos')
+      .from('avatars')
       .getPublicUrl(filePath)
 
     return data.publicUrl

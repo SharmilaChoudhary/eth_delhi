@@ -33,11 +33,11 @@ export async function POST(request: NextRequest) {
 
     // Create profile data
     const profileData = {
-      user_id: userId,
+      name: 'Dummy User', // Dummy name value as requested
       bio,
-      birth_date: birthDate,
+      date_of_birth: birthDate,
       birth_time: birthTime,
-      profile_photo_url: profilePhotoUrl
+      image: profilePhotoUrl || undefined
     }
 
     // Save to database
