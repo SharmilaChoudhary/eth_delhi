@@ -8,14 +8,14 @@ import Image from 'next/image'
 interface Profile {
   id: string
   name: string
-  age: number
-  zodiac: string
+  age?: number
+  zodiac?: string
   bio: string
-  images: string[]
-  location: string
-  interests: string[]
-  compatibility: number
-  lastActive: string
+  images?: string[]
+  location?: string
+  interests?: string[]
+  compatibility?: number
+  lastActive?: string
 }
 
 interface SwipeableProfileCardProps {
@@ -104,7 +104,7 @@ export default function SwipeableProfileCard({
   }
   
   const nextImage = () => {
-    if (currentImageIndex < profile.images.length - 1) {
+    if (profile.images && currentImageIndex < profile.images.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1)
     }
   }
@@ -137,15 +137,21 @@ export default function SwipeableProfileCard({
       <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden">
         {/* Image Container */}
         <div className="relative h-96">
-          <Image
-            src={profile.images[currentImageIndex]}
-            alt={profile.name}
-            fill
-            className="object-cover"
-          />
+          {profile.images && profile.images.length > 0 ? (
+            <Image
+              src={profile.images[currentImageIndex]}
+              alt={profile.name}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+              <span className="text-gray-500 text-lg">No Image</span>
+            </div>
+          )}
           
           {/* Image Navigation */}
-          {profile.images.length > 1 && (
+          {profile.images && profile.images.length > 1 && (
             <>
               <button
                 onClick={prevImage}
@@ -182,30 +188,40 @@ export default function SwipeableProfileCard({
           {/* Profile Info Overlay */}
           <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-2xl font-bold">{profile.name}, {profile.age}</h2>
-              <div className="flex items-center space-x-1">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-medium">{profile.compatibility}% match</span>
-              </div>
+              <h2 className="text-2xl font-bold">
+                {profile.name}{profile.age ? `, ${profile.age}` : ''}
+              </h2>
+              {profile.compatibility && (
+                <div className="flex items-center space-x-1">
+                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  <span className="text-sm font-medium">{profile.compatibility}% match</span>
+                </div>
+              )}
             </div>
             <div className="flex items-center space-x-4 text-sm opacity-90">
-              <div className="flex items-center space-x-1">
-                <MapPin className="w-4 h-4" />
-                <span>{profile.location}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Calendar className="w-4 h-4" />
-                <span>{profile.lastActive}</span>
-              </div>
+              {profile.location && (
+                <div className="flex items-center space-x-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>{profile.location}</span>
+                </div>
+              )}
+              {profile.lastActive && (
+                <div className="flex items-center space-x-1">
+                  <Calendar className="w-4 h-4" />
+                  <span>{profile.lastActive}</span>
+                </div>
+              )}
             </div>
           </div>
           
           {/* Zodiac Badge */}
-          <div className="absolute top-4 right-4">
-            <div className="bg-gradient-to-r from-accent-500 to-warm-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-              {profile.zodiac}
+          {profile.zodiac && (
+            <div className="absolute top-4 right-4">
+              <div className="bg-gradient-to-r from-accent-500 to-warm-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                {profile.zodiac}
+              </div>
             </div>
-          </div>
+          )}
         </div>
         
         {/* Content */}
@@ -213,19 +229,21 @@ export default function SwipeableProfileCard({
           <p className="text-gray-700 mb-4 leading-relaxed">{profile.bio}</p>
           
           {/* Interests */}
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-600 mb-2">Interests</h3>
-            <div className="flex flex-wrap gap-2">
-              {profile.interests.map((interest, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-gradient-to-r from-cosmic-100 to-accent-100 text-cosmic-700 rounded-full text-sm font-medium"
-                >
-                  {interest}
-                </span>
-              ))}
+          {profile.interests && profile.interests.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-600 mb-2">Interests</h3>
+              <div className="flex flex-wrap gap-2">
+                {profile.interests.map((interest, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-gradient-to-r from-cosmic-100 to-accent-100 text-cosmic-700 rounded-full text-sm font-medium"
+                  >
+                    {interest}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
       

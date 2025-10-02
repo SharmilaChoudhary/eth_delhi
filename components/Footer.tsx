@@ -23,10 +23,7 @@ export default function Footer() {
               <span>Cosmic Connections</span>
             </h3>
             <div className="flex items-center justify-center space-x-2 text-gray-300 mb-4">
-              <Mail className="w-4 h-4" />
-              <a href="mailto:contact@cosmicconnections.com" className="hover:text-white">
-                contact@cosmicconnections.com
-              </a>
+             
             </div>
           </motion.div>
 
@@ -65,7 +62,7 @@ export default function Footer() {
               viewport={{ once: true }}
             >
               <p className="text-gray-400 text-sm">
-                © 2024 Cosmic Connections. All rights reserved.
+                © 2025 Cosmic Connections. All rights reserved.
               </p>
               <p className="text-gray-500 text-xs mt-1">
                 Made with <Heart className="w-3 h-3 inline text-red-500" /> and cosmic energy

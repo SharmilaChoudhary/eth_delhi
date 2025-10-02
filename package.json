@@ -32,11 +32,24 @@
     "react": "^18",
     "react-dom": "^18",
     "tailwindcss": "^3.3.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "viem": "^2.37.8"
   },
   "devDependencies": {
     "@types/uuid": "^10.0.0",
     "eslint": "^8",
     "eslint-config-next": "14.0.4"
-  }
+  },
+  "description": "A modern dating platform that combines astrology with meaningful relationships. Built with Next.js, TypeScript, and Tailwind CSS.",
+  "main": "next.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SharmilaChoudhary/eth_delhi.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SharmilaChoudhary/eth_delhi/issues"
+  },
+  "homepage": "https://github.com/SharmilaChoudhary/eth_delhi#readme"
 }
