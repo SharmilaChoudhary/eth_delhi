@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, Camera, Calendar, Clock, User, FileText } from 'lucide-react'
+import { Upload, Camera, Calendar, Clock, User, FileText, Star, Sparkles, Shield, CheckCircle, Wallet } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
+import { calculateZodiacSign, getZodiacInfo, validateBirthDate, calculateAge } from '@/utils/zodiac'
+import { ZodiacSign } from '@/types'
+import { fetchVerifiedUserDataFromSelf, getUserIdentifierFromSelf, VerifiedUserData } from '@/utils/contract'
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -12,15 +15,49 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 export default function ProfileSetup() {
   const router = useRouter()
+  const [verifiedData, setVerifiedData] = useState<VerifiedUserData | null>(null)
   const [formData, setFormData] = useState({
     bio: '',
-    dateOfBirth: '',
     birthTime: '',
     profilePhoto: null as File | null
   })
+  const [zodiacInfo, setZodiacInfo] = useState<any>(null)
   const [previewImage, setPreviewImage] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Load verified data from smart contract on component mount
+  useEffect(() => {
+    const loadVerifiedData = async () => {
+      try {
+        // Get user identifier from Self verification (if available)
+        const userIdentifier = getUserIdentifierFromSelf()
+        console.log('Self user identifier:', userIdentifier)
+
+        // Fetch verified data from smart contract
+        const contractData = await fetchVerifiedUserDataFromSelf(userIdentifier || undefined)
+        if (contractData) {
+          setVerifiedData(contractData)
+          
+          // Calculate zodiac sign from verified birth date
+          if (contractData.date_of_birth) {
+            const zodiac = calculateZodiacSign(contractData.date_of_birth)
+            const info = getZodiacInfo(zodiac)
+            setZodiacInfo(info)
+          }
+        } else {
+          console.log('No verified data found in contract')
+        }
+      } catch (error) {
+        console.error('Error loading verified data from contract:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadVerifiedData()
+  }, [])
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -40,6 +77,7 @@ export default function ProfileSetup() {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -81,12 +119,20 @@ export default function ProfileSetup() {
         }
       }
 
-      // Prepare profile data for database
+      // Use verified data from smart contract
+      if (!verifiedData) {
+        throw new Error('No verified data found. Please complete identity verification first.')
+      }
+
+      // Prepare profile data for database using verified data
       const profileData = {
-        name: 'Dummy User', // Dummy name value as requested
+        name: verifiedData.name,
         bio: formData.bio,
-        date_of_birth: formData.dateOfBirth,
+        date_of_birth: verifiedData.date_of_birth,
         birth_time: formData.birthTime,
+        age: verifiedData.age,
+        nationality: verifiedData.nationality,
+        gender: verifiedData.gender,
         image: profilePhotoUrl
       }
 
@@ -127,6 +173,47 @@ export default function ProfileSetup() {
     }
   }
 
+  // Show loading state while fetching verified data
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cosmic-50 via-warm-50 to-accent-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-cosmic-500 to-accent-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading Verified Data...</h2>
+          <p className="text-gray-600">Retrieving your verified information from the blockchain</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show verification required if no verified data
+  if (!verifiedData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cosmic-50 via-warm-50 to-accent-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="w-16 h-16 bg-gradient-to-r from-cosmic-500 to-accent-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Shield className="w-8 h-8 text-white" />
+          </div>
+          
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Verification Required</h2>
+          
+          <p className="text-gray-600 mb-6">
+            No verification data found in the smart contract. Please complete identity verification with Self first.
+          </p>
+          
+          <button
+            onClick={() => router.push('/signin')}
+            className="w-full px-6 py-3 bg-gradient-to-r from-cosmic-500 to-accent-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+          >
+            Complete Verification
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cosmic-50 via-warm-50 to-accent-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
@@ -158,6 +245,62 @@ export default function ProfileSetup() {
                 Tell us about yourself and let the stars guide your connections
               </p>
             </div>
+
+        {/* Verified Data Display */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-green-200 mb-6">
+          <div className="flex items-center mb-4">
+            <Shield className="w-5 h-5 text-green-500 mr-2" />
+            <h2 className="text-xl font-semibold text-gray-800">Verified Information</h2>
+            <CheckCircle className="w-5 h-5 text-green-500 ml-2" />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-green-50 rounded-lg p-4">
+              <label className="text-sm font-medium text-green-800">Full Name</label>
+              <p className="text-green-900 font-semibold">{verifiedData.name}</p>
+            </div>
+            
+            <div className="bg-green-50 rounded-lg p-4">
+              <label className="text-sm font-medium text-green-800">Nationality</label>
+              <p className="text-green-900 font-semibold">{verifiedData.nationality}</p>
+            </div>
+            
+            <div className="bg-green-50 rounded-lg p-4">
+              <label className="text-sm font-medium text-green-800">Date of Birth</label>
+              <p className="text-green-900 font-semibold">{new Date(verifiedData.date_of_birth).toLocaleDateString()}</p>
+            </div>
+            
+            <div className="bg-green-50 rounded-lg p-4">
+              <label className="text-sm font-medium text-green-800">Age</label>
+              <p className="text-green-900 font-semibold">{verifiedData.age} years old</p>
+            </div>
+            
+            <div className="bg-green-50 rounded-lg p-4">
+              <label className="text-sm font-medium text-green-800">Gender</label>
+              <p className="text-green-900 font-semibold">{verifiedData.gender}</p>
+            </div>
+            
+            {zodiacInfo && (
+              <div className="bg-gradient-to-br from-cosmic-50 to-accent-50 rounded-lg p-4">
+                <label className="text-sm font-medium text-cosmic-800">Zodiac Sign</label>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">{zodiacInfo.symbol}</span>
+                  <div>
+                    <p className="text-cosmic-900 font-semibold">{zodiacInfo.sign}</p>
+                    <p className="text-xs text-cosmic-600">{zodiacInfo.element} • {zodiacInfo.quality}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="mt-4 p-3 bg-green-100 rounded-lg">
+            <p className="text-sm text-green-800 flex items-center">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              This information has been verified on-chain through Self Protocol
+            </p>
+          </div>
+        </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -224,58 +367,71 @@ export default function ProfileSetup() {
             </div>
           </div>
 
-          {/* Birth Details Section */}
+          {/* Birth Time Section */}
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center mb-4">
-              <Calendar className="w-5 h-5 text-cosmic-500 mr-2" />
-              <h2 className="text-xl font-semibold text-gray-800">Birth Details</h2>
+              <Clock className="w-5 h-5 text-cosmic-500 mr-2" />
+              <h2 className="text-xl font-semibold text-gray-800">Birth Time</h2>
             </div>
             <p className="text-xs text-gray-600 mb-4">
-              For astrological compatibility calculations
+              Required for accurate horoscope and compatibility calculations
             </p>
             
-            <div className="grid md:grid-cols-2 gap-4">
-              {/* Birth Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Birth Date *
-                </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Birth Time *
+              </label>
+              <div className="relative">
+                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
-                  type="date"
-                  name="dateOfBirth"
-                  value={formData.dateOfBirth}
+                  type="time"
+                  name="birthTime"
+                  value={formData.birthTime}
                   onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-cosmic-500 focus:border-transparent text-white bg-gray-800"
+                  placeholder="Select birth time"
+                  className="w-full p-3 pl-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-cosmic-500 focus:border-transparent text-gray-800 bg-white"
                   required
                 />
               </div>
+              <p className="text-xs text-gray-500 mt-1">
+                This will be used along with your verified birth date for astrological calculations
+              </p>
+            </div>
 
-              {/* Birth Time */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Birth Time *
-                </label>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="time"
-                    name="birthTime"
-                    value={formData.birthTime}
-                    onChange={handleInputChange}
-                    placeholder="Select birth time"
-                    className="w-full p-3 pl-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-cosmic-500 focus:border-transparent text-white bg-gray-800"
-                    required
-                  />
+            {/* Zodiac Display */}
+            {zodiacInfo && (
+              <div className="bg-gradient-to-br from-cosmic-50 to-accent-50 rounded-xl p-4 border border-cosmic-200 mt-4">
+                <div className="flex items-center space-x-3">
+                  <span className="text-3xl">{zodiacInfo.symbol}</span>
+                  <div>
+                    <p className="font-semibold text-cosmic-700">{zodiacInfo.sign}</p>
+                    <p className="text-sm text-gray-600">{zodiacInfo.element} • {zodiacInfo.quality}</p>
+                    <p className="text-xs text-gray-500">{zodiacInfo.dateRange}</p>
+                  </div>
+                  <Sparkles className="w-6 h-6 text-cosmic-500 ml-auto" />
+                </div>
+                <div className="mt-3">
+                  <p className="text-sm text-gray-600 mb-2">Key Traits:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {zodiacInfo.traits?.slice(0, 3).map((trait: string, index: number) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 bg-white/80 text-cosmic-600 text-xs rounded-full"
+                      >
+                        {trait}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Submit Button */}
           <div className="text-center">
             <button
               type="submit"
-              disabled={isSubmitting || !formData.bio || !formData.dateOfBirth || !formData.birthTime}
+              disabled={isSubmitting || !formData.bio || !formData.birthTime || !verifiedData}
               className="bg-gradient-to-r from-cosmic-500 to-accent-500 hover:from-cosmic-600 hover:to-accent-600 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg"
             >
               {isSubmitting ? (

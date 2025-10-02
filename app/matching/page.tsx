@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, Star, Sparkles, ArrowLeft, Settings, Loader2, MessageCircle, Zap, X } from 'lucide-react'
 import SwipeableProfileCard from '@/components/SwipeableProfileCard'
+import EnhancedProfileCard, { EnhancedProfile } from '@/components/EnhancedProfileCard'
+import ChatInterface from '@/components/ChatInterface'
+import { calculateZodiacSign, getZodiacInfo } from '@/utils/zodiac'
+import { calculateDetailedCompatibility } from '@/utils/horoscope-matching'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 
@@ -31,17 +35,20 @@ interface Profile {
 }
 
 export default function MatchingPage() {
-  const [profiles, setProfiles] = useState<Profile[]>([])
+  const [profiles, setProfiles] = useState<EnhancedProfile[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [likedProfiles, setLikedProfiles] = useState<Profile[]>([])
-  const [passedProfiles, setPassedProfiles] = useState<Profile[]>([])
+  const [likedProfiles, setLikedProfiles] = useState<EnhancedProfile[]>([])
+  const [passedProfiles, setPassedProfiles] = useState<EnhancedProfile[]>([])
   const [showMatch, setShowMatch] = useState(false)
-  const [matchedProfile, setMatchedProfile] = useState<Profile | null>(null)
+  const [matchedProfile, setMatchedProfile] = useState<EnhancedProfile | null>(null)
   const [lastAction, setLastAction] = useState<'like' | 'pass' | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showCompatibility, setShowCompatibility] = useState(false)
   const [showChat, setShowChat] = useState(false)
+  const [showChatInterface, setShowChatInterface] = useState(false)
+  const [currentUserSign, setCurrentUserSign] = useState<any>(null)
+  const [currentUserProfile, setCurrentUserProfile] = useState<any>(null)
 
   // Fetch profiles from database
   useEffect(() => {
@@ -63,8 +70,18 @@ export default function MatchingPage() {
           console.log('Fetched profiles from database:', data)
           
           // Transform database profiles to match the expected format
-          const transformedProfiles: Profile[] = data.map((profile: any) => {
+          const transformedProfiles: EnhancedProfile[] = data.map((profile: any) => {
             console.log('Processing profile:', profile.name, 'Avatar URL:', profile.image)
+            
+            // Calculate zodiac sign if birth date is available
+            const zodiacSign = profile.date_of_birth ? calculateZodiacSign(profile.date_of_birth) : undefined
+            
+            // Calculate compatibility with current user if both have zodiac signs
+            let compatibilityScore = 75 // Default compatibility
+            if (currentUserSign && zodiacSign) {
+              const compatibility = calculateDetailedCompatibility(currentUserSign, zodiacSign)
+              compatibilityScore = compatibility.overall
+            }
             
             return {
               id: profile.id,
@@ -74,13 +91,11 @@ export default function MatchingPage() {
               image: profile.image,
               date_of_birth: profile.date_of_birth,
               birth_time: profile.birth_time,
-              created_at: profile.created_at,
-              // Add display fields with default values
-              zodiac: '♈ Aries', // Default zodiac - you can calculate this from birth date
-              images: profile.image ? [profile.image] : [], // Avatar from avatars bucket
               location: 'Nearby',
               interests: ['Astrology', 'Dating', 'Cosmic Connections'],
-              compatibility: Math.floor(Math.random() * 20) + 80, // Random compatibility 80-100
+              verified: true, // Since they went through Self verification
+              zodiacSign: zodiacSign,
+              compatibility: compatibilityScore, // Real compatibility calculation
               lastActive: 'Recently'
             }
           })
@@ -98,7 +113,31 @@ export default function MatchingPage() {
       }
     }
 
-    fetchProfiles()
+    // Only fetch profiles if we have the current user's sign or after a delay
+    if (currentUserSign) {
+      fetchProfiles()
+    } else {
+      // Fetch profiles anyway after a short delay to allow currentUserSign to be set
+      const timer = setTimeout(fetchProfiles, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [currentUserSign])
+
+  // Get current user's zodiac sign from localStorage
+  useEffect(() => {
+    const userProfile = localStorage.getItem('userProfile')
+    if (userProfile) {
+      try {
+        const profile = JSON.parse(userProfile)
+        setCurrentUserProfile(profile)
+        if (profile.date_of_birth) {
+          const zodiacSign = calculateZodiacSign(profile.date_of_birth)
+          setCurrentUserSign(zodiacSign)
+        }
+      } catch (error) {
+        console.error('Error parsing user profile:', error)
+      }
+    }
   }, [])
 
   const handleSwipe = (direction: 'left' | 'right') => {
@@ -147,6 +186,7 @@ export default function MatchingPage() {
     setMatchedProfile(null)
     setShowCompatibility(false)
     setShowChat(false)
+    setShowChatInterface(false)
   }
 
   const handleCompatibilityCheck = () => {
@@ -159,7 +199,34 @@ export default function MatchingPage() {
     setShowCompatibility(false)
   }
 
+  const handleOpenChatInterface = () => {
+    setShowChatInterface(true)
+    setShowMatch(false)
+  }
+
   const currentProfile = profiles[currentIndex]
+
+  // Show chat interface if active
+  if (showChatInterface && matchedProfile && currentUserProfile) {
+    return (
+      <ChatInterface
+        currentUser={{
+          id: currentUserProfile.id || 'current-user',
+          name: currentUserProfile.name || 'You',
+          image: currentUserProfile.image
+        }}
+        matchedProfile={matchedProfile}
+        onBack={() => {
+          setShowChatInterface(false)
+          setShowMatch(true)
+        }}
+        onClose={() => {
+          setShowChatInterface(false)
+          closeMatch()
+        }}
+      />
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cosmic-50 via-warm-50 to-accent-50">
@@ -306,11 +373,13 @@ export default function MatchingPage() {
                 }}
                 className="relative z-10"
               >
-                <SwipeableProfileCard
+                <EnhancedProfileCard
                   profile={currentProfile}
+                  currentUserSign={currentUserSign}
                   onSwipe={handleSwipe}
                   onLike={handleLike}
                   onPass={handlePass}
+                  showCompatibility={true}
                 />
               </motion.div>
             </AnimatePresence>
@@ -549,7 +618,7 @@ export default function MatchingPage() {
                     </motion.button>
                     <motion.button
                       className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-                      onClick={closeMatch}
+                      onClick={handleOpenChatInterface}
                     >
                       Open Chat
                     </motion.button>

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { motion } from 'framer-motion'
 import { SelfQRcodeWrapper, SelfAppBuilder } from '@selfxyz/qrcode'
 import { v4 as uuidv4 } from 'uuid'
-import { ethers } from 'ethers'
+// import { ethers } from 'ethers'
 import { ArrowLeft, Star, Heart, Sparkles } from 'lucide-react'
 
 export default function SignInPage() {
@@ -19,23 +19,28 @@ export default function SignInPage() {
   useEffect(() => {
     // Initialize Self app when component mounts
     try {
-      const newUserId = ethers.ZeroAddress
+      const newUserId = uuidv4()
       setUserId(newUserId)
       
       const app = new SelfAppBuilder({
         version: 2,
         appName: "Cosmic",
-        scope: "self-workshop",
-        endpoint: "0x4e0e06726521396edf446967d8e697c15f58ac9c",
+        scope: "cosmic",
+        endpoint: "0x3822f3a99940d9a0401c093d734a149cf8b109a9",
         logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
         userId: newUserId,
         endpointType: "celo",
-        userIdType: "hex",
+        userIdType: "uuid",
         userDefinedData: "Welcome to Cosmic!",
         disclosures: {
           minimumAge: 18,
           ofac: false,
-          excludedCountries: ["USA"]
+          excludedCountries:[],
+          // what you want users to reveal
+          name: true,
+          nationality: true,
+          date_of_birth: true,
+          gender: true,
         }
       }).build()
       
@@ -49,12 +54,17 @@ export default function SignInPage() {
   const handleVerificationSuccess = () => {
     const verificationDate = new Date().toISOString()
     
-    // Store verified user data
+    console.log('Verification successful')
+    
+    // Store verified user data with userId (userIdentifier will be fetched from contract)
     localStorage.setItem('verifiedUserData', JSON.stringify({
       userId: userId,
+      userIdentifier: userId, // Use our UUID as the identifier for now
       isVerified: true,
       verificationDate: verificationDate
     }))
+    
+    console.log('Stored userId as userIdentifier:', userId)
     
     setIsVerified(true)
     setVerificationError(null)
