@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "hh": "hardhat",
+    "deploy:base": "hardhat run scripts/deploy.ts --network base",
+    "deploy:base-sepolia": "hardhat run scripts/deploy.ts --network baseSepolia",
+    "deploy:celo": "hardhat run scripts/deploy.ts --network celo",
+    "deploy:alfajores": "hardhat run scripts/deploy.ts --network alfajores"
   },
   "dependencies": {
     "@reown/appkit": "^1.8.8",
@@ -36,9 +41,14 @@
     "viem": "^2.37.8"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.4.0",
     "@types/uuid": "^10.0.0",
+    "dotenv": "^16.6.1",
     "eslint": "^8",
-    "eslint-config-next": "14.0.4"
+    "eslint-config-next": "14.0.4",
+    "hardhat": "^2.26.3",
+    "ts-node": "^10.9.2"
   },
   "description": "A modern dating platform that combines astrology with meaningful relationships. Built with Next.js, TypeScript, and Tailwind CSS.",
   "main": "next.config.js",
