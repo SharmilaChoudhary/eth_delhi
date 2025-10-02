@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@reown/appkit": "^1.8.8",
+    "@reown/appkit-common": "^1.8.8",
+    "@reown/appkit-universal-connector": "^1.8.8",
     "@selfxyz/qrcode": "^1.0.11",
     "@supabase/supabase-js": "^2.58.0",
     "@types/bcryptjs": "^2.4.6",
@@ -20,6 +23,7 @@
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "ethers": "^6.15.0",
     "framer-motion": "^10.16.16",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.294.0",
